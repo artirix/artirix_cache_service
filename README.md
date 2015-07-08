@@ -1,9 +1,9 @@
 # ArtirixCacheService
 
 [![Gem Version](https://badge.fury.io/rb/artirix_cache_service.svg)](http://badge.fury.io/rb/artirix_cache_service)
-[![Build Status](https://travis-ci.org/eturino/artirix_cache_service.svg?branch=master)](https://travis-ci.org/eturino/artirix_cache_service)
-[![Code Climate](https://codeclimate.com/github/eturino/artirix_cache_service.png)](https://codeclimate.com/github/eturino/artirix_cache_service)
-[![Code Climate Coverage](https://codeclimate.com/github/eturino/artirix_cache_service/coverage.png)](https://codeclimate.com/github/eturino/artirix_cache_service)
+[![Build Status](https://travis-ci.org/artirix/artirix_cache_service.svg?branch=master)](https://travis-ci.org/artirix/artirix_cache_service)
+[![Code Climate](https://codeclimate.com/github/artirix/artirix_cache_service.png)](https://codeclimate.com/github/artirix/artirix_cache_service)
+[![Code Climate Coverage](https://codeclimate.com/github/artirix/artirix_cache_service/coverage.png)](https://codeclimate.com/github/artirix/artirix_cache_service)
 
 The basic use of this gem is to compile a cache key based on a given key prefix 
 and some extra variables or options, with some helper methods.
