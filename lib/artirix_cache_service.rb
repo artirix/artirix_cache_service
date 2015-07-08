@@ -7,7 +7,13 @@ module ArtirixCacheService
 
   # Delegation of static methods to the Service instance
   class << self
-    delegate :key, :config_params, :key_prefix, :digest, to: :service
+    delegate :key, :digest,
+             :register_key_prefix, :key_prefix,
+             :default_options, :register_default_options,
+             :register_options, :registered_options,
+             :registered_options?, :registered_options,
+             :options,
+             to: :service
   end
 
   def self.service

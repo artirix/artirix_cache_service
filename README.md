@@ -10,7 +10,7 @@ and some extra variables or options, with some helper methods.
 
 TODO: also help with the cache options.
 
-## Usage
+## Usage: `.key`
 
 The basic way of using it is with the `key` method, which will return the key based on the given arguments. 
 
@@ -23,7 +23,7 @@ ArtirixCacheService.key :some_key # => will return a string with the cache key t
 The service can use a prefix to be applied to all keys
 
 ```ruby
-ArtirixCacheService.config_params[:key_prefix] = :configured_prefix
+ArtirixCacheService.register_key_prefix = :configured_prefix
 ArtirixCacheService.key :some_key # => "configured_prefix/some_key"
 ArtirixCacheService.key :another # => "configured_prefix/another"
 ```
@@ -35,7 +35,7 @@ We can pass other arguments, that will be treated and appended to the cache key.
 note: `blank?` arguments will be skipped.
 
 ```ruby
-ArtirixCacheService.config_params[:key_prefix] = :configured_prefix
+ArtirixCacheService.register_key_prefix :configured_prefix
 
 ArtirixCacheService.key :some_key, :arg1, nil, 'arg2' 
   # => "configured_prefix/some_key/arg1/arg2"
@@ -47,7 +47,7 @@ if an argument (including the first argument) responds to `cache_key`,
 it will be called.
 
 ```ruby
-ArtirixCacheService.config_params[:key_prefix] = :configured_prefix
+ArtirixCacheService.register_key_prefix :configured_prefix
 
 article = Article.find 17
 article.cache_key # => "cache_key_article_17"
@@ -64,7 +64,7 @@ for example in case that we're giving it a long list.
 It will use SHA1.
 
 ```ruby
-ArtirixCacheService.config_params[:key_prefix] = :prfx
+ArtirixCacheService.register_key_prefix :prfx
 
 arg3 = { a: 1, b: 2 }
 ArtirixCacheService.digest arg3 
@@ -82,6 +82,59 @@ ArtirixCacheService.key :some_key, :arg1, 'arg2', digest: [arg3, arg4]
   # => "prfx/some_key/arg1/arg2/7448a071aeee91fc9ee1c705f15445fdd8411224"
 ```
 
+## Usage: `.options`
+
+used for getting the cache options based on the registered defaults and the registered options.
+ 
+```ruby
+
+# unless registered otherwise, the default options is an empty array
+ArtirixCacheService.default_options # => {}
+
+
+# sets the options to be used as default when needed
+ArtirixCacheService.register_default_options expires_in: 300
+
+# we can register some options based on a name (Symbol)
+ArtirixCacheService.registered_options? :my_options # => false
+ArtirixCacheService.registered_options :my_options # => nil
+
+ArtirixCacheService.register_options :my_options, race_condition_ttl: 1
+
+ArtirixCacheService.registered_options? :my_options # => true
+ArtirixCacheService.registered_options :my_options # => { race_condition_ttl: 1 }
+
+```
+
+once we have our different options registered, we can use the Service to get the 
+desired final options.
+
+Given a list of names, it will use the first one that is registered. It will 
+return the options on that name, merged over the default options 
+
+```ruby
+ArtirixCacheService.options :missing, :my_options 
+  # => { expires_in: 300, race_condition_ttl: 1 } 
+```
+
+If no registered option is found from the given list, then it will return 
+- `nil` (if passing keyword `return_if_missing: :nil`)
+- default options (if passing keyword `return_if_missing: :default`)
+- an empty hash (default behaviour, or passing keyword `return_if_missing` with any other value)
+
+```ruby
+ArtirixCacheService.options :missing, :another_missing
+  # => {}
+  
+ArtirixCacheService.options :missing, :another_missing, return_if_missing: :default
+  # => { expires_in: 300 }
+  
+ArtirixCacheService.options :missing, :another_missing, return_if_missing: :nil
+  # => nil
+
+ArtirixCacheService.options :missing, :another_missing, return_if_missing: :empty
+  # => {} 
+```
 
 ## Installation
 
@@ -109,3 +162,10 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/artirix/artirix_cache_service.
 
+
+# Changeset
+
+## v 0.2.0
+
+- removed `ArtirixCacheService.config_params` support, now using `register_key_prefix` method
+- add `options` support

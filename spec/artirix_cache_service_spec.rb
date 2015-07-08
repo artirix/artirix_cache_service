@@ -13,18 +13,21 @@ describe ArtirixCacheService do
 
   let(:prefix) { 'my_prefix' }
 
-  describe '.config_params' do
-    let(:default_config) { { key_prefix: nil } }
+  context 'key_prefix' do
+    let(:default_key_prefix) { nil }
 
-    it 'gives access to the hash of config' do
-      expect(described_class.config_params).to eq default_config
-      expect(described_class.key_prefix).to eq default_config[:key_prefix]
+    describe '.key_prefix' do
+      it 'returns the current key prefix to be used (empty by default)' do
+        expect(described_class.key_prefix).to eq default_key_prefix
+      end
     end
 
-    it 'allows us to modify it BEFORE the service is used' do
-      expect(described_class.key_prefix).to eq default_config[:key_prefix]
-      described_class.config_params[:key_prefix] = prefix
-      expect(described_class.key_prefix).to eq prefix
+    describe '.register_key_prefix' do
+      it 'allows us to modify it' do
+        expect(described_class.key_prefix).to eq default_key_prefix
+        described_class.register_key_prefix prefix
+        expect(described_class.key_prefix).to eq prefix
+      end
     end
   end
 
@@ -41,7 +44,7 @@ describe ArtirixCacheService do
 
   describe '.key' do
     before(:each) do
-      described_class.config_params[:key_prefix] = prefix
+      described_class.register_key_prefix prefix
     end
 
     context 'given no arguments' do
@@ -96,6 +99,97 @@ describe ArtirixCacheService do
         end
       end
 
+    end
+  end
+
+
+  describe '.register_default_options' do
+    let(:default_default_options) { {} }
+    let(:default_options) { { expires_in: 5.minutes } }
+
+    it 'sets the options to be used as default when needed' do
+      expect(described_class.default_options).to eq default_default_options
+      described_class.register_default_options default_options
+      expect(described_class.default_options).to eq default_options
+    end
+  end
+
+  describe '.register_options' do
+    let(:name) { :my_name }
+    let(:options) { { expires_in: 1.hour } }
+    it 'register on the given name the given array of options to be used when needed' do
+      expect(described_class.registered_options? name).to be_falsey
+      expect(described_class.registered_options name).to be_nil
+
+      described_class.register_options name, options
+
+      expect(described_class.registered_options? name).to be_truthy
+      expect(described_class.registered_options name).to eq options
+    end
+
+    it 'needs a valid (not blank) name' do
+      expect { described_class.register_options nil }.to raise_error ArgumentError
+      expect { described_class.register_options '' }.to raise_error ArgumentError
+    end
+  end
+
+  describe '.options' do
+    let(:default_options) { { expires_in: 5.minutes } }
+    let(:options) { { race_condition_ttl: 1 } }
+    let(:name) { :my_name }
+
+    let(:other_options) { { race_condition_ttl: 4 } }
+    let(:other_name) { :other_name }
+
+    let(:expected) { default_options.merge options }
+
+    before(:each) do
+      described_class.register_default_options default_options
+    end
+
+    context 'with a couple of registered' do
+      before(:each) do
+        described_class.register_options name, options
+        described_class.register_options other_name, other_options
+      end
+
+      context 'given a registered option name' do
+        it 'merges into default the options stored into' do
+          expect(described_class.options name).to eq expected
+        end
+      end
+
+      context 'given a list of names, at least one of which is registered' do
+        it 'merges the registered one with defaults' do
+          expect(described_class.options :missing, name, other_name).to eq expected
+        end
+      end
+
+      context 'given no registered options name' do
+        context 'without extra arguments' do
+          it 'returns an empty hash' do
+            expect(described_class.options :missing, :another_missing).to eq({})
+          end
+        end
+
+        context 'with return_if_missing: :default' do
+          it 'returns the default options' do
+            expect(described_class.options :missing, :another_missing, return_if_missing: :default).to eq default_options
+          end
+        end
+
+        context 'with return_if_missing: :nil' do
+          it 'returns nil' do
+            expect(described_class.options :missing, :another_missing, return_if_missing: :nil).to be_nil
+          end
+        end
+
+        context 'with return_if_missing: :empty' do
+          it 'returns an empty hash' do
+            expect(described_class.options :missing, :another_missing, return_if_missing: :empty).to eq({})
+          end
+        end
+      end
     end
   end
 end
