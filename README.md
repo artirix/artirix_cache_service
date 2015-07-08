@@ -257,7 +257,11 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/artiri
 
 # Changeset
 
-## v 0.2.0
+## v0.3.0
+
+- add Redis support
+
+## v0.2.0
 
 - removed `ArtirixCacheService.config_params` support, now using `register_key_prefix` method
 - add `options` support
