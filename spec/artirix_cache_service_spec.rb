@@ -146,6 +146,29 @@ describe ArtirixCacheService do
 
       end
 
+      context 'request' do
+        let(:fullpath) { '/some/path?with=http&arguments=1' }
+
+        let(:request) do
+          OpenStruct.new fullpath: fullpath
+        end
+
+        let(:to_digest) do
+          [fullpath.parameterize, fullpath]
+        end
+
+        context 'given an option with the rails request (or any object that returns a string with `fullpath`)' do
+          context '`service.key :somekey, :arg1, request: rails_request`' do
+            let(:sha1) { Digest::SHA1.hexdigest to_digest.to_s }
+
+            it 'prefix/somekey/arg1/request_fullpath_based_sha1' do
+              expected = "#{prefix}/#{key}/arg1/#{sha1}"
+
+              expect(described_class.key key, :arg1, request: request).to eq expected
+            end
+          end
+        end
+      end
     end
   end
 

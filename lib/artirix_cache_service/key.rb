@@ -40,16 +40,30 @@ module ArtirixCacheService
     def cache_key_from_options(hash)
       return nil unless hash.kind_of? Hash
 
-      d = hash[:digest].presence
-      v = variables_hash(Array(hash[:variables])).presence
+      parts = digest_hash_parts(hash).map(&:presence).compact
 
-      return nil unless d || v
-
-      if d && v
-        digest [d, v]
+      case parts.size
+      when 0
+        nil
+      when 1
+        digest parts.first
       else
-        digest d || v
+        digest parts
       end
+    end
+
+    def digest_hash_parts(hash)
+      [
+        hash[:digest],
+        variables_hash(Array(hash[:variables])),
+        request_list(hash[:request]),
+      ]
+    end
+
+    def request_list(request)
+      return nil unless request.present? && request.fullpath.present?
+
+      [request.fullpath.parameterize, request.fullpath]
     end
 
     def variables_hash(variable_names)

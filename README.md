@@ -6,9 +6,8 @@
 [![Code Climate Coverage](https://codeclimate.com/github/artirix/artirix_cache_service/coverage.png)](https://codeclimate.com/github/artirix/artirix_cache_service)
 
 The basic use of this gem is to compile a cache key based on a given key prefix 
-and some extra variables or options, with some helper methods.
-
-TODO: also help with the cache options.
+and some extra variables or arguments, with some helper methods. It also helps 
+with the cache options.
 
 ## Usage: `.key`
 
@@ -80,6 +79,27 @@ ArtirixCacheService.digest [arg3, arg4]
 
 ArtirixCacheService.key :some_key, :arg1, 'arg2', digest: [arg3, arg4]
   # => "prfx/some_key/arg1/arg2/7448a071aeee91fc9ee1c705f15445fdd8411224"
+```
+
+### `request` as special digest part
+
+we can pass the request as a special argument. The Service will invoke `fullpath` 
+on it in the final digest.
+
+It uses a parameterized version of the fullpath followed by a untouched version, 
+to avoid any collision.
+
+```ruby
+request 
+  # => an ActionDispatch::Request, or any object that responds to `fullpath` 
+ 
+request.fullpath # => "/some/path?with=arguments"
+
+ArtirixCacheService.key :some_key, :arg1, 'arg2', request: request
+  # => "prfx/some_key/arg1/arg2/1d3c96f449b8d21df75ebcf378c8f2455bf4e93c"
+
+# >> Digest::SHA1.hexdigest [request.fullpath.parameterize, request.fullpath].to_s
+# => "1d3c96f449b8d21df75ebcf378c8f2455bf4e93c"
 ```
 
 ## Usage: `.options`
@@ -256,6 +276,10 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/artiri
 
 
 # Changeset
+
+## v0.3.1
+
+- add request support
 
 ## v0.3.0
 
