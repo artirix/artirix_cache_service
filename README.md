@@ -146,6 +146,8 @@ effectively invalidating cache without coupling.
   
 If the variable does not have a value, it will get nil, which is valid for the 
 digest.
+
+Note: we retrieve the variables as strings always, and return nil if `blank?`.
   
 ```ruby
 
@@ -183,12 +185,8 @@ We can also pass an optional block to `variable_get` to set the value if it's ni
 ```ruby
 
 ArtirixCacheService.variable_get :my_var # => nil
-ArtirixCacheService.variable_get(:my_var) { 990 } # => 990
-ArtirixCacheService.variable_get :my_var # => 990
-
-# same as
-val = 990
-ArtirixCacheService.variable_get(:my_var) || ArtirixCacheService.variable_set(:my_var, val) && val 
+ArtirixCacheService.variable_get(:my_var) { 990 } # => "990"
+ArtirixCacheService.variable_get :my_var # => "990" 
 ```
 
 ### Variable Store
@@ -197,7 +195,38 @@ by default (dev mode) the values are stored in an internal hash.
  
 #### Redis
 
-TODO:
+it can connect to Redis, using the given options, and store the variables with
+a given prefix.
+
+```ruby
+redis_options = {
+                  namespace: 'xyz',
+                  host:      'localhost',
+                  port:      6379,
+                  db:        0,
+                }
+
+ArtirixCacheService.redis_options = redis_options
+ArtirixCacheService.register_variables_store :redis, force: true
+```
+
+A prefix on the variable name will be used. By default it's `artirix_cache_service`.
+It gets prepended to the given variable name, and separated by `_`.
+
+```ruby
+# default prefix
+ArtirixCacheService.redis_variable_prefix # => "artirix_cache_service"
+
+# setting a new prefix (don't forget to reload the store)
+ArtirixCacheService.redis_variable_prefix = 'my_app_prefix'
+ArtirixCacheService.register_variables_store :redis, force: true
+
+# checking variables
+ArtirixCacheService.variable_set 'myvar', 'paco'
+
+redis_client = Redis.new redis_options
+redis_client.get 'my_app_prefix_myvar' # => 'paco'
+```
 
 ## Installation
 

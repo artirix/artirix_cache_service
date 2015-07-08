@@ -22,7 +22,9 @@ module ArtirixCacheService
              :registered_options?, :options,
              to: :options_service
 
-    delegate :register_variables_store, :variables_store,
+    delegate :register_variables_store, :variables_store, :reload_variables_store,
+             :redis_options, :redis_options=,
+             :redis_variable_prefix, :redis_variable_prefix=,
              :variable_get, :variable_set,
              to: :variables_store_service
 
