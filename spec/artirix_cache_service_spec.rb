@@ -241,6 +241,21 @@ describe ArtirixCacheService do
 
   describe 'variables' do
     describe '.register_variables_store' do
+
+      context ':another' do
+        it 'raises error' do
+          expect { described_class.register_variables_store :another }.to raise_error ArgumentError
+        end
+      end
+
+      context ':redis' do
+        it 'creates a new variable store of type redis' do
+          described_class.register_variables_store :redis
+          s = described_class.variables_store
+          expect(s.type).to eq :redis
+        end
+      end
+
       context ':internal' do
         context 'first call' do
           it 'creates a new variable store of type internal' do
