@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Eduardo Turiño']
   spec.email         = ['eturino@eturino.com']
 
-  spec.summary       = %q{Common Cache Helpers}
+  spec.summary       = %q{Common Cache Helpers for rails apps}
   # spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.homepage      = 'https://github.com/artirix/artirix_cache_service'
 
   # # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
   # # delete this section to allow pushing this gem to any host.
