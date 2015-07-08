@@ -37,12 +37,14 @@ note: `blank?` arguments will be skipped.
 ```ruby
 ArtirixCacheService.config_params[:key_prefix] = :configured_prefix
 
-ArtirixCacheService.key :some_key, :arg1, nil, 'arg2' # => "configured_prefix/some_key/arg1/arg2"
+ArtirixCacheService.key :some_key, :arg1, nil, 'arg2' 
+  # => "configured_prefix/some_key/arg1/arg2"
 ```
 
 #### `cache_key` compliant arguments
 
-if an argument (including the first argument) responds to `cache_key`, it will be called.
+if an argument (including the first argument) responds to `cache_key`, 
+it will be called.
 
 ```ruby
 ArtirixCacheService.config_params[:key_prefix] = :configured_prefix
@@ -56,7 +58,8 @@ ArtirixCacheService.key :some_key, :arg1, article, 'arg2'
 
 #### Digest
 
-we may want to add a digest to the cache key instead of all arguments, for example in case that we're giving it a long list.
+we may want to add a digest to the cache key instead of all arguments, 
+for example in case that we're giving it a long list.
 
 It will use SHA1.
 
@@ -64,13 +67,15 @@ It will use SHA1.
 ArtirixCacheService.config_params[:key_prefix] = :prfx
 
 arg3 = { a: 1, b: 2 }
-ArtirixCacheService.digest arg3 # => "032b5f154d4ada01bc89a2e8fae8251c090212db"
+ArtirixCacheService.digest arg3 
+  # => "032b5f154d4ada01bc89a2e8fae8251c090212db"
 
 ArtirixCacheService.key :some_key, :arg1, 'arg2', digest: arg3
   # => "prfx/some_key/arg1/arg2/032b5f154d4ada01bc89a2e8fae8251c090212db"
 
 arg4 = [1, 2, 3]
-ArtirixCacheService.digest [arg3, arg4] # => "7448a071aeee91fc9ee1c705f15445fdd8411224"
+ArtirixCacheService.digest [arg3, arg4] 
+  # => "7448a071aeee91fc9ee1c705f15445fdd8411224"
 
 
 ArtirixCacheService.key :some_key, :arg1, 'arg2', digest: [arg3, arg4]
