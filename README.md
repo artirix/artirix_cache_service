@@ -248,6 +248,51 @@ redis_client = Redis.new redis_options
 redis_client.get 'my_app_prefix_myvar' # => 'paco'
 ```
 
+## View Helper
+
+Calling `ArtirixCacheService.view_helper` we can access a module with a 
+`artirix_cache` helper method that acts as a proxy to normal Rails cache 
+view helper method.
+
+It will use the Service to get the final key using the `.key` Service method, 
+and will load up the options to pass to `cache` method looking for the second 
+argument on the registered options (using `.options` Service method).
+
+```ruby
+include ArtirixCacheService.view_helper
+
+
+<%= artirix_cache :my_key, :registered_options_name, :arg1, request: request do %>
+...
+<% end %>
+
+# same as 
+<%= cache ArtirixCacheService.key(:my_key, :arg1, request: request), 
+          ArtirixCacheService.options(:registered_options_name) do %>
+...
+<% end %>
+```
+
+First argument is required and it's the first argument to 
+`ArtirixCacheService.key` call. The 3rd and subsequent arguments are the extra 
+arguments in that call
+
+The second argument will be used to call `.options`. We can supply an array of 
+possible option names to lookup (see `.options` method).
+
+
+```ruby
+<%= artirix_cache :my_key, [:opts1, :otps2], :arg1, request: request do %>
+...
+<% end %>
+
+# same as 
+<%= cache ArtirixCacheService.key(:my_key, :arg1, request: request), 
+          ArtirixCacheService.options(:opts1, :opts2) do %>
+...
+<% end %>
+```
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -276,6 +321,10 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/artiri
 
 
 # Changeset
+
+## v0.4.0
+
+- View Helper with `artirix_cache` helper method
 
 ## v0.3.1
 

@@ -481,4 +481,135 @@ describe ArtirixCacheService do
     end
 
   end
+
+  describe '.view_helper' do
+    context 'return a view_helper with `artirix_cache` method' do
+      it 'is a Module with the artirix_cache method' do
+        helper = described_class.view_helper
+        expect(helper).to be_a_kind_of Module
+
+        instance = view_instance_with_helper(helper)
+        expect(instance).to respond_to :artirix_cache
+      end
+
+      context '`artirix_cache(key_prefix, options_name = [], *key_params, &block)`' do
+        let(:fullpath) { '/some/path?with=http&arguments=1' }
+
+        let(:request) do
+          OpenStruct.new fullpath: fullpath
+        end
+
+        let(:default_options) { { expires_in: 5.minutes } }
+
+        let(:options1) { { disable_cache: true } }
+        let(:options2) { { expires_in: 15.minutes } }
+        let(:options3) { { expires_in: 1.hour } }
+
+        let(:merged_options1) { default_options.merge options1 }
+        let(:merged_options2) { default_options.merge options2 }
+        let(:merged_options3) { default_options.merge options3 }
+
+
+        before(:each) do
+          described_class.register_default_options default_options
+          described_class.register_options :options1, options1
+          described_class.register_options :options2, options2
+          described_class.register_options :options3, options3
+        end
+
+        let(:view) { view_instance_with_helper described_class.view_helper }
+
+        context 'first argument' do
+          it 'first argument is the base for `.key` call' do
+            expect(ArtirixCacheService).to receive(:key).with(:my_key, :other, :arg)
+            res = view.artirix_cache :my_key, :options2, :other, :arg do
+              'SOME STRING'
+            end
+
+            expect(res).to eq 'SOME STRING'
+          end
+
+          it 'is required' do
+            expect do
+              view.artirix_cache do
+                'SOME STRING'
+              end
+            end.to raise_error ArgumentError
+
+            expect do
+              view.artirix_cache nil do
+                'SOME STRING'
+              end
+            end.to raise_error ArgumentError
+
+            expect do
+              view.artirix_cache '' do
+                'SOME STRING'
+              end
+            end.to raise_error ArgumentError
+          end
+        end
+
+        context 'third and subsequent arguments' do
+          it 'extra arguments to `.key`' do
+            expect(ArtirixCacheService).to receive(:key).with(:my_key, :other, :arg, { request: request })
+            res = view.artirix_cache :my_key, :options2, :other, :arg, request: request do
+              'SOME STRING'
+            end
+
+            expect(res).to eq 'SOME STRING'
+          end
+        end
+
+        context 'second argument' do
+          context 'given a registered option' do
+            it 'gets that option from the Service and passes it to the `cache` method' do
+              expected_key = described_class.key :my_key, :arg
+
+              expect(view).to receive(:cache).with(expected_key, options2)
+
+              view.artirix_cache :my_key, :options2, :arg do
+                'STRING'
+              end
+            end
+          end
+
+          context 'given a list of options, at least one registered' do
+            it 'gets that option from the Service and passes it to the `cache` method' do
+              expected_key = described_class.key :my_key, :arg
+
+              expect(view).to receive(:cache).with(expected_key, options2)
+
+              view.artirix_cache :my_key, [:nope, :options2, :options3], :arg do
+                'STRING'
+              end
+            end
+          end
+
+          context 'given a list of options, none registered' do
+            it 'gets the default options from the Service and passes it to the `cache` method' do
+              expected_key = described_class.key :my_key, :arg
+
+              expect(view).to receive(:cache).with(expected_key, default_options)
+
+              view.artirix_cache :my_key, [:nope, :neither], :arg do
+                'STRING'
+              end
+            end
+          end
+
+          context 'with selected option with `disable_cache: true`' do
+            it 'yields without invoking `cache`' do
+              expect(view).not_to receive(:cache)
+              res = view.artirix_cache :key, [:no_options, :options1] do
+                'SOME STRING'
+              end
+
+              expect(res).to eq 'SOME STRING'
+            end
+          end
+        end
+      end
+    end
+  end
 end

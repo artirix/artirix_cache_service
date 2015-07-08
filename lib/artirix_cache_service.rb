@@ -1,6 +1,7 @@
 require 'active_support/all'
 require 'redis'
 require 'artirix_cache_service/version'
+require 'artirix_cache_service/view_helper'
 require 'artirix_cache_service/key'
 require 'artirix_cache_service/options_service'
 require 'artirix_cache_service/variables_store_service'
@@ -23,6 +24,10 @@ module ArtirixCacheService
              :redis_variable_prefix, :redis_variable_prefix=,
              :variable_set, :variable_get,
              to: :service
+  end
+
+  def self.view_helper
+    ViewHelper
   end
 
   def self.service
