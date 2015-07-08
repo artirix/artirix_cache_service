@@ -136,6 +136,69 @@ ArtirixCacheService.options :missing, :another_missing, return_if_missing: :empt
   # => {} 
 ```
 
+## Variables
+
+as part of the cache_key, we can specify the name of a variable that the Service 
+can retrieve to use in the digest.
+
+Using this, we can effectively change cache_keys arguments without changing code, 
+effectively invalidating cache without coupling.
+  
+If the variable does not have a value, it will get nil, which is valid for the 
+digest.
+  
+```ruby
+
+# some_view.html.erb
+<%= cache ArtirixCacheService.key(:my_key, variables: :classification) %>
+...
+<% end %>
+
+# first request, variable :my_var does not have a value (nil), so 
+# the cache_key is "prfx/my_key/333a21750df06ef3c82aece819ded0f6f691638a" 
+
+# Digest::SHA1.hexdigest( { my_var: nil }.to_s )
+#  # => "333a21750df06ef3c82aece819ded0f6f691638a"
+
+# model_a.rb
+uuid = SecureRandom.uuid # => "6d6eb11e-0241-4f97-b706-91982eb8e69b"
+ArtirixCacheService.variable_set :my_var, uuid
+
+# now the next request on the view, the cache key is different:
+# cache key is "prfx/my_key/a8484d25b7c57b1f93a05ad82422d7b45c4ad83e"
+
+# Digest::SHA1.hexdigest( { my_var: uuid }.to_s )
+#  # => "a8484d25b7c57b1f93a05ad82422d7b45c4ad83e"
+
+# => 
+```
+
+This way we can invalidate based on a variable value, without directly 
+invalidating cache, for the use cases when we cannot rely on the argument's `cache_key`. 
+
+We use `variable_set` to set new values, and `variable_get` to retrieve them.
+
+We can also pass an optional block to `variable_get` to set the value if it's nil.
+
+```ruby
+
+ArtirixCacheService.variable_get :my_var # => nil
+ArtirixCacheService.variable_get(:my_var) { 990 } # => 990
+ArtirixCacheService.variable_get :my_var # => 990
+
+# same as
+val = 990
+ArtirixCacheService.variable_get(:my_var) || ArtirixCacheService.variable_set(:my_var, val) && val 
+```
+
+### Variable Store
+
+by default (dev mode) the values are stored in an internal hash.
+ 
+#### Redis
+
+TODO:
+
 ## Installation
 
 Add this line to your application's Gemfile:

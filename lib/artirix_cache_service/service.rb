@@ -17,59 +17,23 @@ module ArtirixCacheService
       Digest::SHA1.hexdigest arg.to_s
     end
 
-    def default_options
-      @default_options ||= {}
-    end
+    delegate :default_options, :register_default_options,
+             :register_options, :registered_options,
+             :registered_options?, :options,
+             to: :options_service
 
-    def register_default_options(default_options)
-      @default_options = Hash(default_options)
-      self
-    end
-
-    def register_options(name, options)
-      raise ArgumentError if name.blank?
-      options_map[name.to_sym] = Hash(options)
-      self
-    end
-
-    def registered_options(name)
-      return nil unless name.present?
-      options_map[name.to_sym]
-    end
-
-    def registered_options?(name)
-      !registered_options(name).nil?
-    end
-
-    def options(*names, return_if_missing: :empty)
-      name = names.detect { |name| registered_options? name }
-      if name.present?
-        get_options(name)
-      else
-        missing_options(return_if_missing)
-      end
-    end
+    delegate :register_variables_store, :variables_store,
+             :variable_get, :variable_set,
+             to: :variables_store_service
 
     private
 
-    def missing_options(return_if_missing)
-      case return_if_missing
-      when :default
-        default_options.dup
-      when :nil, nil
-        nil
-      else
-        {}
-      end
+    def options_service
+      @options_service ||= OptionsService.new
     end
 
-    def get_options(name)
-      default_options.merge registered_options(name)
+    def variables_store_service
+      @variables_store_service ||= VariablesStoreService.new
     end
-
-    def options_map
-      @options_map ||= {}
-    end
-
   end
 end

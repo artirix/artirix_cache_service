@@ -99,9 +99,53 @@ describe ArtirixCacheService do
         end
       end
 
+      context 'variables' do
+        before(:each) do
+          described_class.variable_set variable_name1, variable_value1
+          described_class.variable_set variable_name2, variable_value2
+          described_class.variable_set :my_var, 1
+        end
+
+        let(:variable_name1) { :var1 }
+        let(:variable_value1) { Faker::Lorem.sentence }
+        let(:variable_name2) { :var2 }
+        let(:variable_value2) { 123 }
+
+        let(:expected_variable_hash) do
+          {
+            variable_name1 => variable_value1,
+            variable_name2 => variable_value2,
+            unset:         nil,
+          }
+        end
+
+        context '`service.key :somekey, arg1, variables: [:var1, :var2, :unset]`' do
+          let(:sha1) { Digest::SHA1.hexdigest expected_variable_hash.to_s }
+
+          it 'prefix/somekey/arg1/sha1_of_hash_with_variable_names_and_values_from_store' do
+            expected = "#{prefix}/#{key}/arg1/#{sha1}"
+
+            expect(described_class.key key, :arg1, variables: [variable_name1, variable_name2, :unset]).to eq expected
+          end
+        end
+
+        context 'with digest at the same time: joint digest from normal digest and variables hash' do
+          context '`service.key :somekey, arg1, digest: [:dig1, :dig2] variables: :my_var`' do
+            let(:expected_variable_hash) { { my_var: 1 } }
+            let(:sha1) { Digest::SHA1.hexdigest [[:dig1, :dig2], expected_variable_hash].to_s }
+
+            it 'prefix/somekey/arg1/sha1_of_hash_with_digest_array_and_variable_names_and_values_from_store' do
+              expected = "#{prefix}/#{key}/arg1/#{sha1}"
+
+              expect(described_class.key key, :arg1, digest: [:dig1, :dig2], variables: :my_var).to eq expected
+            end
+          end
+        end
+
+      end
+
     end
   end
-
 
   describe '.register_default_options' do
     let(:default_default_options) { {} }
@@ -190,6 +234,82 @@ describe ArtirixCacheService do
           end
         end
       end
+    end
+  end
+
+  describe 'variables' do
+    describe '.register_variables_store' do
+      context ':internal' do
+        context 'first call' do
+          it 'creates a new variable store of type internal' do
+            described_class.register_variables_store :internal
+            s = described_class.variables_store
+            expect(s.type).to eq :internal
+          end
+        end
+
+        context 'with an already established internal variable store' do
+          it 'keeps the same variable store' do
+            described_class.register_variables_store :internal
+
+            s = described_class.variables_store
+
+            described_class.register_variables_store :internal
+            expect(described_class.variables_store.object_id).to eq s.object_id
+          end
+        end
+      end
+    end
+
+    describe '.variables_store' do
+      context 'without any registered' do
+        it 'returns an internal store' do
+          s = described_class.variables_store
+          expect(s.type).to eq :internal
+          expect(described_class.variables_store.object_id).to eq s.object_id
+        end
+      end
+    end
+
+    context 'with store :internal' do
+      before(:each) do
+        described_class.register_variables_store :internal
+      end
+
+      let(:variable_key) { :my_var }
+      let(:variable_value) { 1234 }
+
+      define '.variable_set(key, value)' do
+        it 'sets the given value in the given key' do
+          expect(described_class.variable_get variable_key).to be_nil
+          described_class.variable_set variable_key, variable_value
+          expect(described_class.variable_get variable_key).to eq variable_value
+        end
+      end
+
+      define '.variable_get' do
+        context 'with a key with a value' do
+          it 'returns the value' do
+            described_class.variable_set variable_key, variable_value
+            expect(described_class.variable_get variable_key).to eq variable_value
+          end
+        end
+
+        context 'with a key without a value' do
+          it 'returns nil' do
+            expect(described_class.variable_get variable_key).to be_nil
+          end
+        end
+
+        context 'with a key without a value and a block' do
+          it 'sets the result of the block and returns it' do
+            expect(described_class.variable_get variable_key).to be_nil
+            expect(described_class.variable_get(variable_key) { 990 }).to eq 990
+            expect(described_class.variable_get variable_key).to eq 990
+          end
+        end
+      end
+
     end
   end
 end

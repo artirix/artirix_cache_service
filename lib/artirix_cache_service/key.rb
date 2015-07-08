@@ -9,7 +9,7 @@ module ArtirixCacheService
       @args    = clean_key_args given_args
     end
 
-    delegate :key_prefix, :digest, to: :service
+    delegate :key_prefix, :digest, :variable_get, to: :service
 
     def call
       clean_parts.join KEY_SEPARATOR
@@ -39,9 +39,21 @@ module ArtirixCacheService
 
     def cache_key_from_options(hash)
       return nil unless hash.kind_of? Hash
-      return nil unless hash[:digest]
 
-      digest hash[:digest]
+      d = hash[:digest].presence
+      v = variables_hash(Array(hash[:variables])).presence
+
+      return nil unless d || v
+
+      if d && v
+        digest [d, v]
+      else
+        digest d || v
+      end
+    end
+
+    def variables_hash(variable_names)
+      Hash[variable_names.map { |var| [var, variable_get(var)] }]
     end
 
   end
