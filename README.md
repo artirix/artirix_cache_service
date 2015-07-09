@@ -286,6 +286,7 @@ possible option names to lookup (see `.options` method).
 <%= artirix_cache :my_key, [:opts1, :otps2], :arg1, request: request do %>
 ...
 <% end %>
+```
 
 ### with `disable_cache: true` in the options
 
