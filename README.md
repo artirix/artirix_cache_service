@@ -259,9 +259,10 @@ and will load up the options to pass to `cache` method looking for the second
 argument on the registered options (using `.options` Service method).
 
 ```ruby
+# in ApplicationHelper
 include ArtirixCacheService.view_helper
 
-
+# in the view
 <%= artirix_cache :my_key, :registered_options_name, :arg1, request: request do %>
 ...
 <% end %>
@@ -286,11 +287,27 @@ possible option names to lookup (see `.options` method).
 ...
 <% end %>
 
-# same as 
-<%= cache ArtirixCacheService.key(:my_key, :arg1, request: request), 
-          ArtirixCacheService.options(:opts1, :opts2) do %>
+### with `disable_cache: true` in the options
+
+There is one important difference from using the `artirix_cache` view helper and
+calling `cache` directly. If the options hash to be used has a truthy value on
+`disable_cache` key, then it will `yield` directly and it will not call the 
+`cache` method
+
+example:
+
+```ruby
+# having:
+ArtirixCacheService.options :options_with_disabled
+  # => { expires_in: 300, disable_cache: true }
+
+
+# in the view
+<%= artirix_cache :my_key, :options_with_disabled, :arg1, request: request do %>
 ...
 <% end %>
+
+# will never call `cache` method, it will yield directly
 ```
 
 ## Installation
