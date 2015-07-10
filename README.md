@@ -172,7 +172,7 @@ Note: we retrieve the variables as strings always, and return nil if `blank?`.
 ```ruby
 
 # some_view.html.erb
-<%= cache ArtirixCacheService.key(:my_key, variables: :classification) %>
+<%= cache ArtirixCacheService.key(:my_key, variables: :my_var) %>
 ...
 <% end %>
 
