@@ -25,7 +25,7 @@ module ArtirixCacheService
       @variables_store ||= build_internal
     end
 
-    delegate :variable_get, :variable_set, :type, to: :variables_store
+    delegate :variable_get, :variable_set, :variables, :type, to: :variables_store
 
     private
 

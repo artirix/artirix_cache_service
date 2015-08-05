@@ -5,6 +5,10 @@ module ArtirixCacheService
         :internal
       end
 
+      def variables
+        map.keys.map &:to_s
+      end
+
       private
 
       def retrieve(key)

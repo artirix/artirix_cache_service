@@ -25,7 +25,7 @@ module ArtirixCacheService
     delegate :register_variables_store, :variables_store, :reload_variables_store,
              :redis_options, :redis_options=,
              :redis_variable_prefix, :redis_variable_prefix=,
-             :variable_get, :variable_set,
+             :variable_get, :variable_set, :variables,
              to: :variables_store_service
 
     private

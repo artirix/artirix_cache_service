@@ -209,6 +209,12 @@ ArtirixCacheService.variable_get(:my_var) { 990 } # => "990"
 ArtirixCacheService.variable_get :my_var # => "990" 
 ```
 
+We can list the variables that the service has currently access to with `.variables`
+ 
+```ruby
+ArtirixCacheService.variables # => [ "my_var" ]
+```
+
 ### Variable Store
 
 by default (dev mode) the values are stored in an internal hash.
@@ -339,6 +345,10 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/artiri
 
 
 # CHANGELOG
+
+## v0.5.0
+
+- added `.variables`
 
 ## v0.4.0
 

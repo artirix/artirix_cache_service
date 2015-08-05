@@ -2,6 +2,10 @@ module ArtirixCacheService
   module VariablesStores
     class Base
 
+      def variables
+        raise 'abstract method not overridden'
+      end
+
       def variable_get(given_key, &block)
         key = given_key.to_sym
         val = retrieve(key).presence

@@ -121,7 +121,7 @@ describe ArtirixCacheService do
           }
         end
 
-        context '`service.key :somekey, arg1, variables: [:var1, :var2, :unset]`' do
+        describe '`service.key :somekey, arg1, variables: [:var1, :var2, :unset]`' do
           let(:sha1) { Digest::SHA1.hexdigest expected_variable_hash.to_s }
 
           it 'prefix/somekey/arg1/sha1_of_hash_with_variable_names_and_values_from_store' do
@@ -132,7 +132,7 @@ describe ArtirixCacheService do
         end
 
         context 'with digest at the same time: joint digest from normal digest and variables hash' do
-          context '`service.key :somekey, arg1, digest: [:dig1, :dig2] variables: :my_var`' do
+          describe '`service.key :somekey, arg1, digest: [:dig1, :dig2] variables: :my_var`' do
             let(:expected_variable_hash) { { my_var: '1' } }
             let(:sha1) { Digest::SHA1.hexdigest [[:dig1, :dig2], expected_variable_hash].to_s }
 
@@ -344,6 +344,19 @@ describe ArtirixCacheService do
       let(:variable_key) { :my_var }
       let(:variable_value) { 1234 }
 
+      describe '.variables' do
+        let(:variable_keys) { [:key_a, :key_b, :key_c] }
+        let(:expected_variable) { variable_keys.map &:to_s }
+
+        it 'returns a list of variable keys already set' do
+          variable_keys.each_with_index do |key, index|
+            described_class.variable_set key, index
+          end
+
+          expect(described_class.variables.sort).to eq expected_variable.sort
+        end
+      end
+
       describe '.variable_set(key, value)' do
         it 'sets the given value in the given key' do
           expect(described_class.variable_get variable_key).to be_nil
@@ -435,6 +448,19 @@ describe ArtirixCacheService do
 
         let(:variable_key) { :my_var }
         let(:variable_value) { 1234 }
+
+        describe '.variables' do
+          let(:variable_keys) { [:key_a, :key_b, :key_c] }
+          let(:expected_variable) { variable_keys.map &:to_s }
+
+          it 'returns a list of variable keys already set' do
+            variable_keys.each_with_index do |key, index|
+              described_class.variable_set key, index
+            end
+
+            expect(described_class.variables.sort).to eq expected_variable.sort
+          end
+        end
 
         describe '.variable_set(key, value)' do
           it 'sets the given value in the given key' do
