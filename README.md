@@ -346,7 +346,9 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/artiri
 
 # CHANGELOG
 
-## v0.5.1
+## v0.6.0
+
+(renamed `v.0.5.1` to `v.0.6.0` since it is a change in the API)
 
 - `redis_client` can now be injected into the service.
 
