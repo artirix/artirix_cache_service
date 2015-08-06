@@ -405,6 +405,20 @@ describe ArtirixCacheService do
       let(:redis_client) { Redis.new redis_options }
 
       context 'settings' do
+        describe '.redis_client' do
+          it 'default: creates a new Redis client' do
+            expect(described_class.redis_client).to be_a(::Redis)
+          end
+
+          it 'can be set the redis client' do
+            described_class.redis_client = redis_client
+            expect(described_class.redis_client).to eq redis_client
+
+            described_class.register_variables_store :redis, force: true
+            expect(described_class.redis_client).to eq redis_client
+          end
+        end
+
         describe '.redis_options' do
           it 'default options: an empty hash' do
             expect(described_class.redis_options).to eq({})
@@ -443,6 +457,7 @@ describe ArtirixCacheService do
           described_class.reload_service
           described_class.redis_variable_prefix = redis_prefix
           described_class.redis_options         = redis_options
+          described_class.redis_client          = redis_client
           described_class.register_variables_store :redis, force: true
         end
 

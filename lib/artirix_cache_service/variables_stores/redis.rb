@@ -5,15 +5,16 @@ module ArtirixCacheService
       EMPTY_STRING = ''.freeze
       WILDCARD     = '*'.freeze
 
-      attr_reader :redis_variable_prefix
+      attr_reader :redis_variable_prefix, :redis_client
 
       def type
         :redis
       end
 
-      def initialize(redis_variable_prefix, redis_options = {})
+      def initialize(redis_variable_prefix:, redis_client:, redis_options: {})
         @redis_variable_prefix = redis_variable_prefix
         @redis_options         = redis_options
+        @redis_client          = redis_client
       end
 
       def variables
@@ -23,15 +24,15 @@ module ArtirixCacheService
       private
 
       def list
-        redis.keys(complete_key(WILDCARD))
+        redis_client.keys(complete_key(WILDCARD))
       end
 
       def retrieve(key)
-        redis.get(complete_key(key))
+        redis_client.get(complete_key(key))
       end
 
       def store(key, value)
-        redis.set(complete_key(key), value)
+        redis_client.set(complete_key(key), value)
       end
 
       def complete_key(key)
@@ -46,9 +47,6 @@ module ArtirixCacheService
         @clean_listed_regex ||= /^#{redis_variable_prefix}_/
       end
 
-      def redis
-        @redis ||= ::Redis.new @redis_options
-      end
     end
   end
 end

@@ -2,8 +2,17 @@ module ArtirixCacheService
   class VariablesStoreService
     DEFAULT_PREFIX = 'artirix_cache_service'.freeze
 
-    attr_writer :redis_options
+    attr_writer :redis_client
     attr_writer :redis_variable_prefix
+
+    def redis_client
+      @redis_client ||= ::Redis.new redis_options
+    end
+
+    def redis_options=(options)
+      @redis_client = nil # to restore the client
+      @redis_options = options
+    end
 
     def redis_options
       @redis_options ||= {}
@@ -47,7 +56,9 @@ module ArtirixCacheService
 
     def build_redis(force = false)
       return @variables_store if !force && @variables_store.kind_of?(VariablesStores::Redis)
-      VariablesStores::Redis.new redis_variable_prefix, redis_options
+      VariablesStores::Redis.new redis_variable_prefix: redis_variable_prefix,
+                                 redis_options: redis_options,
+                                 redis_client: redis_client
     end
   end
 end

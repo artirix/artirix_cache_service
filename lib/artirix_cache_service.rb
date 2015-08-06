@@ -21,6 +21,7 @@ module ArtirixCacheService
              :registered_options?, :registered_options, :options,
              :variables_store, :register_variables_store, :reload_variables_store,
              :redis_options, :redis_options=,
+             :redis_client, :redis_client=,
              :redis_variable_prefix, :redis_variable_prefix=,
              :variable_set, :variable_get, :variables,
              to: :service
