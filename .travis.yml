@@ -23,5 +23,5 @@ gemfile:
 
 matrix:
   exclude:
-    - gemfile: Gemfile.as4
+    - gemfile: Gemfile
       rvm: 2.1.7
