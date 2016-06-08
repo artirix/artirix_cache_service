@@ -5,8 +5,8 @@
 [![Code Climate](https://codeclimate.com/github/artirix/artirix_cache_service.png)](https://codeclimate.com/github/artirix/artirix_cache_service)
 [![Code Climate Coverage](https://codeclimate.com/github/artirix/artirix_cache_service/coverage.png)](https://codeclimate.com/github/artirix/artirix_cache_service)
 
-The basic use of this gem is to compile a cache key based on a given key prefix 
-and some extra variables or arguments, with some helper methods. It also helps 
+The basic use of this gem is to compile a cache key based on a given key prefix
+and some extra variables or arguments, with some helper methods. It also helps
 with the cache options.
 
 ## Usage: `.key`
@@ -345,6 +345,10 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/artiri
 
 
 # CHANGELOG
+
+## v0.7.0
+
+opening dependency on ActiveSupport to include v5
 
 ## v0.6.0
 

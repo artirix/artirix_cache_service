@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in html_surgeon.gemspec
 gemspec
 
-gem 'activesupport', '<6', '>=5.0.0.rc1'
+gem 'activesupport', '~>4'
 
 group :development, :test do
   gem 'pry'
