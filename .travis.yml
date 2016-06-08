@@ -18,10 +18,10 @@ notifications:
     on_success: never
 
 gemfile:
-  - Gemfile
+  - Gemfile.as5
   - Gemfile.as4
 
 matrix:
   exclude:
-    - gemfile: Gemfile
+    - gemfile: Gemfile.as5
       rvm: 2.1.7
